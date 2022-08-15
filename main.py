@@ -1,5 +1,7 @@
+from time import time
 from flask import Flask, jsonify, request
-import sqlite3
+import sqlite3, socket
+from datetime import datetime
 app = Flask(__name__)
 
 @app.get("/")
@@ -8,7 +10,7 @@ def home():
 
 @app.post("/newWord")
 def NewWord():
-    response = 'abcde'  
+    response = 'Working'  
     message = {"answer": response}
     print(message)
     return jsonify(message)
@@ -16,20 +18,28 @@ def NewWord():
 @app.post("/<int:device_id>")
 def allow(device_id):
     data = request.get_json()
-    # if device_id < 25:
-    func(device_id, data)
+    log_data(device_id, data)
     return f'You have been allowed to enter because the data is {str(device_id)}'
-    # else:
-    #     return f'You are not allowed'
 
-def func(Id, Data):
-    print("Device id is:",Id," and the data received is:",  Data)
-    # conn = sqlite3.connect('test.db')
-    # c = conn.cursor()
+def log_data(Id, Data):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("Device id is:",Id," and the data received is:", Data, "at time:", timestamp)
+    Temp = Data['text']
+    Status = Data['answer']
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    c.execute("""CREATE TABLE IF NOT EXISTS DataLogging(
+                    Device_Id int,
+                    Status text,
+                    Temp int,
+                    Time text)
+                """)
     # c.execute("SELECT rowid,* FROM tasks ORDER BY due DESC")
-    # # c.execute("INSERT INTO tasks VALUES (?,?,?,?)", (task, desc, date, 1))
-    # conn.commit()
-    # conn.close()
+    c.execute("INSERT INTO DataLogging VALUES (?,?,?,?)", (Id, Status, Temp, timestamp))
+    conn.commit()
+    conn.close()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.debug=True
+    IPAddr = socket.gethostbyname(socket.gethostname())  
+    app.run(host=IPAddr, port=5000)

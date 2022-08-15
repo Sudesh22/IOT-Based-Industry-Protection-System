@@ -1,11 +1,9 @@
 import './App.css';
 
-function App() {
+export default function App() {
   return (
     <div className="App">
       <p>Hello from React</p>
     </div>
   );
 }
-
-export default App;
