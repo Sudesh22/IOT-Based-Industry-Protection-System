@@ -70,11 +70,12 @@ def isValid(email, password):
 
 @app.post("/signup")
 def signUp():
+    name = request.get_json().get("name")
     email = request.get_json().get("email")
     password = request.get_json().get("password")
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
-    c.execute("INSERT INTO loginDetails VALUES (?,?)", (email, password))
+    c.execute("INSERT INTO loginDetails VALUES (?,?,?)", (name,email, password))
     conn.close()
     return jsonify({"status": "email added successfully"}) 
 # ////////////////////////////////////////////////////////
