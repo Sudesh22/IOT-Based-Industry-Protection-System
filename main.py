@@ -39,6 +39,46 @@ def log_data(Id, Data):
     conn.commit()
     conn.close()
 
+# ////////////////////////////////////////////////////////
+@app.post("/<int:device_id>/dashboard")
+def dashboard(device_id):
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    Data = c.execute("SELECT * FROM DataLogging WHERE Device_Id = ? ORDER BY Time DESC'", (device_id,)).fetchone()
+    conn.close()
+    return 
+
+@app.post("/signin")
+def signIn():
+    email = request.get_json().get("email")
+    password = request.get_json().get("password")
+    if isValid(email, password):
+        return jsonify({"status": "logged in successfully"}) 
+    else:
+         return jsonify({"status": "Error logging in"})
+
+def isValid(email, password):
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    Data = c.execute("SELECT * FROM loginDetails WHERE email = ? AND password = ?", (email, password)).fetchall()
+    if (email==Data[0][0] and password==Data[0][1]):
+        conn.close()
+        return True
+    else:
+        conn.close()
+        return False
+
+@app.post("/signup")
+def signUp():
+    email = request.get_json().get("email")
+    password = request.get_json().get("password")
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO loginDetails VALUES (?,?)", (email, password))
+    conn.close()
+    return jsonify({"status": "email added successfully"}) 
+# ////////////////////////////////////////////////////////
+
 if __name__ == "__main__":
     app.debug=True
     IPAddr = socket.gethostbyname(socket.gethostname())  
