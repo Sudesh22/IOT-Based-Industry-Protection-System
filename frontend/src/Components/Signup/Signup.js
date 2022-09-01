@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-export default function Signup({onRouteChange}) {
+export default function Signup({ onRouteChange, loadUser }) {
     const [signUp, setSignUp] = React.useState({
         signUpName: '',
         signUpEmail: '',
@@ -10,10 +10,26 @@ export default function Signup({onRouteChange}) {
     function handleChange(e) {
         const { name, value } = e.target;
         setSignUp(prev => ({ ...prev, [name]: value }))
-        console.log(signUp.signUpName);
-        console.log(signUp.signUpEmail);
-        console.log(signUp.signUpPassword);
     }
+    function onSubmitSignUp(){
+        fetch('http://192.168.0.108:5000/signup', {
+            method: 'post',
+            headers: { 'Content-type': 'application/json' },
+            body: JSON.stringify({
+                name: signUp.signUpName,
+                email: signUp.signUpEmail,
+                password: signUp.signUpPassword,
+            })
+        })
+            .then(response => response.json())
+            .then(user => {
+                if (user[0]) {
+                    loadUser(user[0])
+                    onRouteChange('home')
+                }
+            })
+    }
+    
     return (
         <article className="br3 ba dark-gray b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5">
             <main className="pa4 black-80 center">
@@ -56,17 +72,17 @@ export default function Signup({onRouteChange}) {
                             className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
                             type="submit"
                             value="Register"
-                        // onClick={this.onSubmitRegister} 
+                            onClick={onSubmitSignUp}
                         />
                     </div>
                     <div className="lh-copy mt3">
-                            <p 
-                                onClick={() => onRouteChange('signin')}
-                                className="f6 link dim black db pointer"
-                            >
-                                {'Sign in'}
-                            </p>
-                        </div>
+                        <p
+                            onClick={() => onRouteChange('signin')}
+                            className="f6 link dim black db pointer"
+                        >
+                            {'Sign in'}
+                        </p>
+                    </div>
                 </div>
             </main>
         </article>
