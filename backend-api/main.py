@@ -2,11 +2,14 @@ from time import time
 from flask import Flask, jsonify, request
 import sqlite3, socket
 from datetime import datetime
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 @app.get("/")
 def home():
-    return("<h1>hello<h1/>")
+    return ("<h1>Hello</h1>")
 
 @app.post("/newWord")
 def NewWord():
@@ -39,7 +42,6 @@ def log_data(Id, Data):
     conn.commit()
     conn.close()
 
-# ////////////////////////////////////////////////////////
 @app.post("/<int:device_id>/dashboard")
 def dashboard(device_id):
     conn = sqlite3.connect('test.db')
@@ -48,37 +50,39 @@ def dashboard(device_id):
     conn.close()
     return 
 
+
 @app.post("/signin")
 def signIn():
     email = request.get_json().get("email")
     password = request.get_json().get("password")
     if isValid(email, password):
-        return jsonify({"status": "logged in successfully"}) 
+        return jsonify(isValid(email,password)) 
     else:
          return jsonify({"status": "Error logging in"})
 
-def isValid(email, password):
+def isValid(email, password): 
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
     Data = c.execute("SELECT * FROM loginDetails WHERE email = ? AND password = ?", (email, password)).fetchall()
-    if (email==Data[0][0] and password==Data[0][1]):
+    if (email==Data[0][2] and password==Data[0][3]):
         conn.close()
-        return True
+        return Data
     else:
         conn.close()
         return False
 
 @app.post("/signup")
 def signUp():
-    name = request.get_json().get("name")
     email = request.get_json().get("email")
     password = request.get_json().get("password")
+    name = request.get_json().get("name")
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
-    c.execute("INSERT INTO loginDetails VALUES (?,?,?)", (name,email, password))
+    c.execute("INSERT INTO loginDetails (name,email,password) VALUES (?,?,?)", (name,email,password))
+    data = c.execute("SELECT * FROM loginDetails WHERE email = ? AND password = ?", (email, password)).fetchall()
+    conn.commit()
     conn.close()
-    return jsonify({"status": "email added successfully"}) 
-# ////////////////////////////////////////////////////////
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.debug=True
