@@ -50,7 +50,6 @@ def dashboard(device_id):
     conn.close()
     return 
 
-
 @app.post("/signin")
 def signIn():
     email = request.get_json().get("email")
@@ -64,12 +63,17 @@ def isValid(email, password):
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
     Data = c.execute("SELECT * FROM loginDetails WHERE email = ? AND password = ?", (email, password)).fetchall()
-    if (email==Data[0][2] and password==Data[0][3]):
-        conn.close()
-        return Data
+    # print(Data)
+    if (Data==[]):
+        return {"status": "Error logging in"}
     else:
-        conn.close()
-        return False
+        if (email==Data[0][2] and password==Data[0][3]):
+            conn.close()
+            print(Data)
+            return Data
+        else:
+            conn.close()
+            return False
 
 @app.post("/signup")
 def signUp():

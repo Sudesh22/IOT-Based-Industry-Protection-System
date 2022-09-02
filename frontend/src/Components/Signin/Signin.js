@@ -10,7 +10,7 @@ export default function Signin({ onRouteChange,loadUser }) {
         setSignIn(prev => ({ ...prev, [name]: value }))
     }
     function onSubmitSignIn(){
-        fetch('http://192.168.0.108:5000/signin', {
+        fetch('/signin', {
             method: 'post',
             headers: { 'Content-type': 'application/json' },
             body: JSON.stringify({

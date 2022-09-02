@@ -12,7 +12,7 @@ export default function Signup({ onRouteChange, loadUser }) {
         setSignUp(prev => ({ ...prev, [name]: value }))
     }
     function onSubmitSignUp(){
-        fetch('http://192.168.0.108:5000/signup', {
+        fetch('/signup', {
             method: 'post',
             headers: { 'Content-type': 'application/json' },
             body: JSON.stringify({
