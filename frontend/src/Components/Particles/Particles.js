@@ -17,7 +17,7 @@ const Particle = function(){
             "enable": true,
             "zIndex": -1
         },
-        fpsLimit: 300,
+        fpsLimit: 600,
         interactivity: {
           events: {
             onClick: {

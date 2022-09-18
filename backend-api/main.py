@@ -11,36 +11,26 @@ CORS(app)
 def home():
     return ("<h1>Hello</h1>")
 
-@app.post("/newWord")
-def NewWord():
-    response = 'Working'  
-    message = {"answer": response}
-    print(message)
-    return jsonify(message)
-
-@app.post("/<int:device_id>")
+@app.post("/<int:device_id>/data")
 def allow(device_id):
     data = request.get_json()
-    log_data(device_id, data)
-    return f'You have been allowed to enter because the data is {str(device_id)}'
-
-def log_data(Id, Data):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print("Device id is:",Id," and the data received is:", Data, "at time:", timestamp)
-    Temp = Data['text']
-    Status = Data['answer']
+    Temp = data["Temperature"]
+    Status = data["Status"]
+    Humi = data["Humidity"]
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS DataLogging(
                     Device_Id int,
                     Status text,
                     Temp int,
+                    Humi int,
                     Time text)
                 """)
-    # c.execute("SELECT rowid,* FROM tasks ORDER BY due DESC")
-    c.execute("INSERT INTO DataLogging VALUES (?,?,?,?)", (Id, Status, Temp, timestamp))
+    c.execute("INSERT INTO DataLogging VALUES (?,?,?,?,?)", (device_id, Status, Temp, Humi, timestamp))
     conn.commit()
     conn.close()
+    return f'Data sent by {str(device_id)} was received successfully '
 
 @app.post("/<int:device_id>/dashboard")
 def dashboard(device_id):
@@ -63,7 +53,6 @@ def isValid(email, password):
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
     Data = c.execute("SELECT * FROM loginDetails WHERE email = ? AND password = ?", (email, password)).fetchall()
-    # print(Data)
     if (Data==[]):
         return {"status": "Error logging in"}
     else:
